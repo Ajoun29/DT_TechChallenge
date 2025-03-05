@@ -1,0 +1,19 @@
+CREATE OR REPLACE TABLE devoteamtechchallenge.devoteam_baseball.pitcher_by_game AS
+SELECT
+  pitcherId,
+  pitcherFirstName || ' ' || pitcherLastName AS pitcher_name,
+  gameId AS game,  -- Need to confirm team affiliation logic (home/away)
+  COUNT(*) AS total_pitches,
+  CASE 
+    WHEN inningHalf = 'top' THEN awayTeamId 
+    ELSE homeTeamId 
+  END AS team,
+  SUM(is_hit) AS hits_allowed,
+  AVG(pitchSpeed) AS avg_pitch_speed,
+  avg(is_wild_pitch) as avg_wild_pitch
+FROM
+  `bigquery-public-data.baseball.games_wide`
+WHERE
+  is_ab = 1  -- Filter to actual at-bats
+GROUP BY
+  pitcherId, pitcher_name, game, team;
